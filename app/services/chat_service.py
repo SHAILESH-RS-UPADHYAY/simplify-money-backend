@@ -56,6 +56,13 @@ def chat(message: str, session_id: str = None):
     try:
         result = chain_with_history.invoke({"question": message}, config=config)
         reply_text = result.content
+        
+        # New Gemini SDK might return a list of content blocks instead of a string
+        if isinstance(reply_text, list):
+            reply_text = "".join([block.get("text", "") if isinstance(block, dict) else str(block) for block in reply_text])
+        elif not isinstance(reply_text, str):
+            reply_text = str(reply_text)
+            
     except Exception as e:
         # Graceful fallback if Gemini API hits free tier limits
         print(f"Gemini API Error: {e}")
