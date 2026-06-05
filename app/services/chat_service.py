@@ -5,6 +5,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_core.chat_history import InMemoryChatMessageHistory
 from app.config import GEMINI_API_KEY
+from app.services.gold_service import fetch_gold_price
 
 # load system prompt from file
 prompt_path = os.path.join(os.path.dirname(__file__), "..", "prompts", "system_prompt.txt")
@@ -54,7 +55,11 @@ def chat(message: str, session_id: str = None):
     config = {"configurable": {"session_id": session_id}}
     
     try:
-        result = chain_with_history.invoke({"question": message}, config=config)
+        # Fetch actual live price and inject it as hidden context
+        current_price = fetch_gold_price()
+        context_injected_message = f"[SYSTEM INSTRUCTION: The actual live price of 24K gold right now is Rs {current_price} per gram. Use this exact price if the user asks.]\n\n{message}"
+        
+        result = chain_with_history.invoke({"question": context_injected_message}, config=config)
         reply_text = result.content
         
         # New Gemini SDK might return a list of content blocks instead of a string
