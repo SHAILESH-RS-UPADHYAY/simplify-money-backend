@@ -13,9 +13,9 @@ with open(prompt_path, "r") as f:
 
 # setup gemini
 llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash",
+    model="gemini-flash-latest",
     google_api_key=GEMINI_API_KEY,
-    temperature=0.7,
+    temperature=0.7
 )
 
 # prompt template with history support
